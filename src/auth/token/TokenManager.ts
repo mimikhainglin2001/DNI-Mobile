@@ -10,14 +10,17 @@ export class TokenManager implements ITokenManager {
 
   private USER = "user";
 
-  async saveTokens(accessToken: string, refreshToken: string): Promise<void> {
-    if (!accessToken || !refreshToken) {
-      throw new Error("Cannot save empty tokens");
+  async saveTokens(
+    accessToken: string,
+    refreshToken?: string,
+  ): Promise<void> {
+    if (!accessToken) {
+      throw new Error("Cannot save empty access token");
     }
 
     await SecureStore.setItemAsync(this.ACCESS_TOKEN, accessToken);
 
-    await SecureStore.setItemAsync(this.REFRESH_TOKEN, refreshToken);
+    await SecureStore.setItemAsync(this.REFRESH_TOKEN, refreshToken ?? "");
   }
 
   async saveUser(user: UserEntity): Promise<void> {

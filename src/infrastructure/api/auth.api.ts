@@ -4,51 +4,35 @@ import { getApiClient } from "@/core/network/api-client";
 @injectable()
 export class AuthApi {
   async login(email: string, password: string) {
-    return getApiClient().post("/v1/auth/login", {
+    return getApiClient().post("/api/v1/login", {
       email,
       password,
     });
   }
 
   async register(name: string, email: string, password: string) {
-    return getApiClient().post("/v1/auth/register", {
+    return getApiClient().post("/api/v1/register", {
       name,
-
       email,
-
       password,
     });
   }
 
-  async verifyEmail(verificationId: string, otp: string) {
-    return getApiClient().post("/v1/auth/verify-email", {
-      verificationId,
-
-      otp,
+  async verifyEmail(otp: string) {
+    return getApiClient().post("/api/v1/verify-email", {
+      token: otp,
     });
   }
 
-  async resendVerification(verificationId: string) {
-    return getApiClient().post("/v1/auth/resend-verification", {
-      verificationId,
-    });
-  }
-  async forgotPassword(email: string) {
-    return getApiClient().post("/v1/auth/forgot-password", {
+  async resendVerification(email: string) {
+    return getApiClient().post("/api/v1/verify-email/resend", {
       email,
     });
   }
 
-  async resendForgotPassword(verificationId: string) {
-    return getApiClient().post("/v1/auth/resend-forgot-password", {
-      verificationId,
-    });
-  }
-
-  async verifyForgotPassword(verificationId: string, otp: string) {
-    return getApiClient().post("/v1/auth/verify-forgot-password", {
-      verificationId,
-      otp,
+  async forgotPassword(email: string) {
+    return getApiClient().post("/api/v1/forgot-password", {
+      email,
     });
   }
 
@@ -57,15 +41,15 @@ export class AuthApi {
     newPassword: string,
     confirmPassword: string,
   ) {
-    return getApiClient().post("/v1/auth/reset-password", {
-      resetToken,
-      newPassword,
-      confirmPassword,
+    return getApiClient().post("/api/v1/reset-password", {
+      token: resetToken,
+      password: newPassword,
+      password_confirmation: confirmPassword,
     });
   }
 
   async getMe(accessToken?: string) {
-    return getApiClient().get("/v1/users/me", {
+    return getApiClient().get("/api/v1/me", {
       headers: accessToken
         ? {
             Authorization: `Bearer ${accessToken}`,

@@ -67,6 +67,8 @@ export default function VerifyResetCodeScreen() {
   } = useVerifyResetCodeForm({
     verificationId,
 
+    email,
+
     onVerified: (result) => {
       navigation.replace("ResetPassword", {
         resetToken: result.resetToken,

@@ -100,7 +100,7 @@ export function useVerifyEmailForm({
     setMessage("");
 
     try {
-      const result = await vm.resend(verificationId);
+      const result = await vm.resend(email);
 
       if (result.success) {
         setMessage("Verification code resent. Check your email.");

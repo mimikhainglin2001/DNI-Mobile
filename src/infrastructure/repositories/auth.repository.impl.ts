@@ -12,6 +12,9 @@ export class AuthRepositoryImpl implements AuthRepository {
   async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {
     const response = await this.authRefreshApi.refreshToken(refreshToken);
 
-    return response.data;
+    return {
+      accessToken: response.data.access_token,
+      refreshToken: response.data.refresh_token ?? "",
+    };
   }
 }

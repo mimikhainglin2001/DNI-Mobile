@@ -9,7 +9,7 @@ export class ResendVerificationUseCase {
     private repository: IUserRepository,
   ) {}
 
-  execute(verificationId: string) {
-    return this.repository.resendVerification(verificationId);
+  execute(email: string) {
+    return this.repository.resendVerification(email);
   }
 }
