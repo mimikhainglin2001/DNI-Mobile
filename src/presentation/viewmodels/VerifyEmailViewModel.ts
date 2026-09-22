@@ -38,7 +38,7 @@ export class VerifyEmailViewModel {
     return result;
   }
 
-  async resend(verificationId: string) {
-    return resendVerificationUseCase.execute(verificationId);
+  async resend(email: string) {
+    return resendVerificationUseCase.execute(email);
   }
 }

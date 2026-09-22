@@ -8,7 +8,7 @@ export class VerifyForgotPasswordViewModel {
     return verifyForgotPasswordUseCase.execute(verificationId, otp);
   }
 
-  async resend(verificationId: string) {
-    return resendForgotPasswordUseCase.execute(verificationId);
+  async resend(email: string) {
+    return resendForgotPasswordUseCase.execute(email);
   }
 }

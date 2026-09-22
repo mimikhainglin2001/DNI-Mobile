@@ -24,29 +24,9 @@ export class UserRepositoryImpl implements IUserRepository {
 
   async login(email: string, password: string) {
     try {
-      /*
-       * Authenticate.
-       */
       const res = await this.api.login(email, password);
 
-      const data = res.data;
-
-      /*
-       * A new/untrusted device makes the backend
-       * request login OTP verification. That
-       * response carries no tokens, so returning
-       * a "successful" session here would later
-       * produce a "No refresh token available"
-       * error when the client tries to refresh.
-       */
-      if (data.requiresVerification || !data.accessToken || !data.refreshToken) {
-        return Result.fail<AuthResponseEntity>(
-          data.message ??
-            "New device detected. A verification code has been sent to your email.",
-        );
-      }
-
-      const { accessToken, refreshToken } = data;
+      const accessToken = res.data.access_token;
 
       /*
        * Immediately use the newly received
@@ -54,15 +34,18 @@ export class UserRepositoryImpl implements IUserRepository {
        */
       const me = await this.api.getMe(accessToken);
 
-      /*
-       * Convert API response to domain entity.
-       */
-      const user = new UserEntity(me.data.id, me.data.name, me.data.email);
+      const user = new UserEntity(
+        me.data.user.id,
+        me.data.user.name,
+        me.data.user.email,
+      );
 
       /*
-       * Create domain authentication response.
+       * The backend returns the refresh token
+       * via HttpOnly cookie only, so the mobile
+       * client has no refresh token available.
        */
-      const auth = new AuthResponseEntity(user, accessToken, refreshToken);
+      const auth = new AuthResponseEntity(user, accessToken, "");
 
       return Result.ok(auth);
     } catch (error) {
@@ -74,8 +57,15 @@ export class UserRepositoryImpl implements IUserRepository {
     try {
       const res = await this.api.register(name, email, password);
 
+      /*
+       * Backend verification is email-OTP based and does not
+       * return a verificationId; the user id is used as the
+       * navigation handle passed to the verify screen.
+       */
+      const verificationId = String(res.data.user?.id ?? "");
+
       return Result.ok({
-        verificationId: res.data.verificationId,
+        verificationId,
       } as RegisterResult);
     } catch (error) {
       return Result.fail<RegisterResult>(getApiError(error));
@@ -89,7 +79,7 @@ export class UserRepositoryImpl implements IUserRepository {
     password: string,
   ) {
     try {
-      await this.api.verifyEmail(verificationId, otp);
+      await this.api.verifyEmail(otp);
 
       return this.login(email, password);
     } catch (error) {
@@ -97,9 +87,9 @@ export class UserRepositoryImpl implements IUserRepository {
     }
   }
 
-  async resendVerification(verificationId: string) {
+  async resendVerification(email: string) {
     try {
-      await this.api.resendVerification(verificationId);
+      await this.api.resendVerification(email);
 
       return Result.ok(true);
     } catch (error) {
@@ -109,22 +99,22 @@ export class UserRepositoryImpl implements IUserRepository {
 
   async forgotPassword(email: string) {
     try {
-      const res = await this.api.forgotPassword(email);
+      await this.api.forgotPassword(email);
 
       return Result.ok({
-        verificationId: res.data.verificationId,
+        verificationId: email,
       } as ForgotPasswordResult);
     } catch (error) {
       return Result.fail<ForgotPasswordResult>(getApiError(error));
     }
   }
 
-  async resendForgotPassword(verificationId: string) {
+  async resendForgotPassword(email: string) {
     try {
-      const res = await this.api.resendForgotPassword(verificationId);
+      await this.api.forgotPassword(email);
 
       return Result.ok({
-        verificationId: res.data.verificationId,
+        verificationId: email,
       } as ForgotPasswordResult);
     } catch (error) {
       return Result.fail<ForgotPasswordResult>(getApiError(error));
@@ -132,16 +122,15 @@ export class UserRepositoryImpl implements IUserRepository {
   }
 
   async verifyForgotPassword(verificationId: string, otp: string) {
-    try {
-      const res = await this.api.verifyForgotPassword(verificationId, otp);
-
-      return Result.ok({
-        resetToken: res.data.resetToken,
-        expiresAt: res.data.expiresAt,
-      } as VerifyForgotPasswordResult);
-    } catch (error) {
-      return Result.fail<VerifyForgotPasswordResult>(getApiError(error));
-    }
+    /*
+     * The backend has no intermediate "verify reset code" step:
+     * the 6-digit code from the email IS the password reset token,
+     * so it is passed straight through to the reset step.
+     */
+    return Result.ok({
+      resetToken: otp,
+      expiresAt: "",
+    } as VerifyForgotPasswordResult);
   }
 
   async resetPassword(
@@ -163,9 +152,9 @@ export class UserRepositoryImpl implements IUserRepository {
       const response = await this.api.getMe();
 
       const user = new UserEntity(
-        response.data.id,
-        response.data.name,
-        response.data.email,
+        response.data.user.id,
+        response.data.user.name,
+        response.data.user.email,
       );
 
       return Result.ok(user);

@@ -7,7 +7,7 @@ import { ENV } from "../config/env";
 export const refreshClient = axios.create({
   baseURL: ENV.API_URL,
 
-  timeout: 10000,
+  timeout: 30000,
 
   headers: {
     "Content-Type": "application/json",

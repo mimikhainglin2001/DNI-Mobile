@@ -36,7 +36,7 @@ export interface IUserRepository {
   ): Promise<Result<AuthResponseEntity>>;
 
   resendVerification(
-    verificationId: string,
+    email: string,
   ): Promise<Result<boolean>>;
 
   forgotPassword(
@@ -44,7 +44,7 @@ export interface IUserRepository {
   ): Promise<Result<ForgotPasswordResult>>;
 
   resendForgotPassword(
-    verificationId: string,
+    email: string,
   ): Promise<Result<ForgotPasswordResult>>;
 
   verifyForgotPassword(

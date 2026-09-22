@@ -20,10 +20,16 @@ type MessageType = "success" | "error" | "warning" | "info";
 interface Params {
   verificationId: string;
 
+  email: string;
+
   onVerified?: (result: VerifyForgotPasswordResult) => void;
 }
 
-export function useVerifyResetCodeForm({ verificationId, onVerified }: Params) {
+export function useVerifyResetCodeForm({
+  verificationId,
+  email,
+  onVerified,
+}: Params) {
   const vm = useMemo(() => new VerifyForgotPasswordViewModel(), []);
 
   const inputRefs = useRef<Array<TextInput | null>>([]);
@@ -98,7 +104,7 @@ export function useVerifyResetCodeForm({ verificationId, onVerified }: Params) {
     setMessage("");
 
     try {
-      const result = await vm.resend(verificationId);
+      const result = await vm.resend(email);
 
       if (result.success) {
         setMessage("Reset code resent. Check your email.");

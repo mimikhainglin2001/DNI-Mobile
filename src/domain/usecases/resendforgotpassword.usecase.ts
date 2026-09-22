@@ -9,7 +9,7 @@ export class ResendForgotPasswordUseCase {
     private repository: IUserRepository,
   ) {}
 
-  execute(verificationId: string) {
-    return this.repository.resendForgotPassword(verificationId);
+  execute(email: string) {
+    return this.repository.resendForgotPassword(email);
   }
 }
