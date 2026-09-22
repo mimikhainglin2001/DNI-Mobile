@@ -198,7 +198,7 @@ export default function RegisterScreen() {
           <View style={styles.container}>
             {/* HEADER */}
 
-            <AppHeader title="EnterpriseRN" subtitle="Create your account" />
+            <AppHeader title="DailyNeedItems" subtitle="Create your account" />
 
             {/* FORM */}
 

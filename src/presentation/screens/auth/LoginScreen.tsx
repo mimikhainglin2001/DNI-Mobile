@@ -144,7 +144,7 @@ export default function LoginScreen() {
         >
           <View style={styles.container}>
             <AppHeader
-              title="EnterpriseRN"
+              title="DailyNeedItems"
               subtitle="Sign in to your account"
             />
 

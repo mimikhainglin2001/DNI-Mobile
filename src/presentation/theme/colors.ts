@@ -1,17 +1,19 @@
 export const Colors = {
-  primary: "#2563EB",
+  primary: "#059669",
+
+  primaryDark: "#047857",
 
   secondary: "#64748B",
 
-  background: "#FFFFFF",
+  background: "#F5F5F5",
 
-  surface: "#F8FAFC",
+  surface: "#FFFFFF",
 
   text: "#111827",
 
   textSecondary: "#6B7280",
 
-  border: "#D1D5DB",
+  border: "#E5E7EB",
 
   error: "#DC2626",
 
