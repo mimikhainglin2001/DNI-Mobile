@@ -19,9 +19,42 @@ export interface CatalogProduct {
   orderedQuantity?: number;
 }
 
+export interface CatalogBanner {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl?: string;
+  buttonText?: string;
+}
+
 type CategoryResponse = {
   data?: CatalogCategory[];
   items?: CatalogCategory[];
+};
+
+type BannerResponse = {
+  data?: Array<{
+    id: string;
+    title?: string;
+    name?: string;
+    description?: string;
+    subtitle?: string;
+    imageUrl?: string;
+    image?: string;
+    buttonText?: string;
+    ctaText?: string;
+  }>;
+  items?: Array<{
+    id: string;
+    title?: string;
+    name?: string;
+    description?: string;
+    subtitle?: string;
+    imageUrl?: string;
+    image?: string;
+    buttonText?: string;
+    ctaText?: string;
+  }>;
 };
 
 type GraphQLResponse = {
@@ -90,18 +123,48 @@ function unwrap<T>(payload: T | { data: T }): T {
 
 function toAssetUrl(path?: string | null): string | undefined {
   if (!path) return undefined;
+
+  const productServiceOrigin = ENV.PRODUCT_SERVICE_URL.replace(
+    /\/api\/v\d+\/?$/i,
+    "",
+  );
+  if (/^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i.test(path)) {
+    return path.replace(
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i,
+      productServiceOrigin,
+    );
+  }
   if (/^(https?:|data:|blob:)/i.test(path)) return path;
 
-  const base = ENV.PRODUCT_SERVICE_URL.replace(/\/api\/v\d+\/?$/i, "");
-  return `${base}/uploads/${path.replace(/^\/?(uploads\/)?/, "")}`;
+  return `${productServiceOrigin}/uploads/${path.replace(/^\/?(uploads\/)?/, "")}`;
 }
 
 export const catalogApi = {
+  async getBanners(): Promise<CatalogBanner[]> {
+    const response = await productClient.get<BannerResponse>("/banners");
+    const banners = response.data.data ?? response.data.items ?? [];
+
+    return banners
+      .map((banner) => ({
+        id: banner.id,
+        title: banner.title ?? banner.name ?? "",
+        description: banner.description ?? banner.subtitle,
+        imageUrl: toAssetUrl(banner.imageUrl ?? banner.image),
+        buttonText: banner.buttonText ?? banner.ctaText,
+      }))
+      .filter((banner) => banner.title.length > 0);
+  },
+
   async getCategories(): Promise<CatalogCategory[]> {
     const response = await productClient.get<CategoryResponse>("/categories", {
       params: { page: 1, limit: 100 },
     });
-    return response.data.data ?? response.data.items ?? [];
+    return (response.data.data ?? response.data.items ?? []).map(
+      (category) => ({
+        ...category,
+        image: toAssetUrl(category.image),
+      }),
+    );
   },
 
   async getProducts(): Promise<CatalogProduct[]> {
